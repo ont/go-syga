@@ -24,7 +24,7 @@ func NewClientApi(url string, bucket string) *ClientApi {
 	}
 }
 
-func (c *ClientApi) CreateSession(username string, password string) (*SessionResponse, error) {
+func (c *ClientApi) CreateSession(username string, password string) (*SessionToken, error) {
 	url := c.url + "/" + url.QueryEscape(c.bucket) + "/_session"
 
 	sessReq := SessionPasswordRequest{
@@ -58,11 +58,11 @@ func (c *ClientApi) CreateSession(username string, password string) (*SessionRes
 		return nil, fmt.Errorf("Can't find SyncGatewaySession cookie in server response headers")
 	}
 
-	sessionResponse := &SessionResponse{
+	token := &SessionToken{
 		CookieName: sessCookie.Name,
 		SessionId:  sessCookie.Value,
 		Expires:    sessCookie.Expires.UTC().Format("2006-01-02T15:04:05-0700"),
 	}
 
-	return sessionResponse, nil
+	return token, nil
 }

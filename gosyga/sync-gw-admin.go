@@ -30,10 +30,18 @@ type SessionRequest struct {
 	TTL      int    `json:"ttl"`
 }
 
-type SessionResponse struct {
+type SessionToken struct {
 	CookieName string `json:"cookie_name"`
 	Expires    string `json:"expires"`
 	SessionId  string `json:"session_id"`
+}
+
+type SessionInfo struct {
+	Valid bool `json:"ok"`
+	User  struct {
+		Username string         `json:"name"`
+		Channels map[string]int `json:"channels"`
+	} `json:"userCtx"`
 }
 
 func NewAdminApi(url string, bucket string) *AdminApi {
@@ -43,8 +51,8 @@ func NewAdminApi(url string, bucket string) *AdminApi {
 	}
 }
 
-func (d *AdminApi) GetUser(uuid string) (*User, error) {
-	url := d.url + "/" + url.QueryEscape(d.bucket) + "/_user/" + url.QueryEscape(uuid)
+func (a *AdminApi) GetUser(uuid string) (*User, error) {
+	url := a.url + "/" + url.QueryEscape(a.bucket) + "/_user/" + url.QueryEscape(uuid)
 
 	resp, err := Do_GET(url)
 
@@ -54,6 +62,10 @@ func (d *AdminApi) GetUser(uuid string) (*User, error) {
 
 	if resp.Code == 404 {
 		return nil, nil // user doesn't exists in database
+	}
+
+	if resp.Code != 200 {
+		return nil, fmt.Errorf("Can't get user, got non-200 response code: %d", resp.Code)
 	}
 
 	var user User
@@ -66,8 +78,8 @@ func (d *AdminApi) GetUser(uuid string) (*User, error) {
 	return &user, nil
 }
 
-func (d *AdminApi) CreateUser(uuid string, password string) (*User, error) {
-	url := d.url + "/" + url.QueryEscape(d.bucket) + "/_user/"
+func (a *AdminApi) CreateUser(uuid string, password string) (*User, error) {
+	url := a.url + "/" + url.QueryEscape(a.bucket) + "/_user/"
 	fmt.Println("CreateUser:>", url)
 
 	user := User{
@@ -88,11 +100,11 @@ func (d *AdminApi) CreateUser(uuid string, password string) (*User, error) {
 		return nil, err
 	}
 
-	return d.GetUser(uuid)
+	return a.GetUser(uuid)
 }
 
-func (d *AdminApi) CreateSession(username string) (*SessionResponse, error) {
-	url := d.url + "/" + url.QueryEscape(d.bucket) + "/_session"
+func (a *AdminApi) CreateSession(username string) (*SessionToken, error) {
+	url := a.url + "/" + url.QueryEscape(a.bucket) + "/_session"
 
 	sessReq := SessionRequest{
 		UserName: username,
@@ -110,12 +122,56 @@ func (d *AdminApi) CreateSession(username string) (*SessionResponse, error) {
 		return nil, err
 	}
 
-	var sessionResp SessionResponse
-	err = json.Unmarshal(resp.Body, &sessionResp)
+	if resp.Code != 200 {
+		return nil, fmt.Errorf("Can't create session, got non-200 response code: %d", resp.Code)
+	}
+
+	var token SessionToken
+	err = json.Unmarshal(resp.Body, &token)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &sessionResp, nil
+	return &token, nil
+}
+
+// Simple version of GET /{db}/{doc} call.
+// Unmarshal any valid response into variable "v".
+func (a *AdminApi) GetDoc(docId string, v interface{}) error {
+	url := a.url + "/" + url.QueryEscape(a.bucket) + "/" + docId
+
+	resp, err := Do_GET(url)
+	if err != nil {
+		return err
+	}
+
+	if resp.Code != 200 {
+		return fmt.Errorf("Can't get document, got non-200 response code: %d", resp.Code)
+	}
+
+	err = json.Unmarshal(resp.Body, v)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *AdminApi) GetSession(sessionId string) (*SessionInfo, error) {
+	url := a.url + "/" + url.QueryEscape(a.bucket) + "/_session/" + sessionId
+
+	resp, err := Do_GET(url)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.Code != 200 {
+		return nil, fmt.Errorf("Can't get session %s, got non-200 response code: %d", sessionId, resp.Code)
+	}
+
+	var sessionInfo SessionInfo
+	err = json.Unmarshal(resp.Body, &sessionInfo)
+
+	return &sessionInfo, nil
 }
