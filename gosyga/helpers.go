@@ -7,6 +7,9 @@ import (
 	"net/http"
 )
 
+// General json document with unknown fields
+type JsonDoc map[string]interface{}
+
 // This helper-structure holds data from more general repsonse of net/http library
 type Response struct {
 	Code    int
@@ -52,10 +55,18 @@ func Do_GET(url string) (*Response, error) {
 }
 
 func Do_POST(url string, data []byte) (*Response, error) {
-	// TODO: add logrus to all fmt.Println...
-	fmt.Println("POST>", url)
+	return sendJsonRequest("POST", url, data)
+}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
+func Do_PUT(url string, data []byte) (*Response, error) {
+	return sendJsonRequest("PUT", url, data)
+}
+
+func sendJsonRequest(method string, url string, data []byte) (*Response, error) {
+	// TODO: add logrus to all fmt.Println...
+	fmt.Println(method+">", url)
+
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
 
 	if err != nil {
 		return nil, err
