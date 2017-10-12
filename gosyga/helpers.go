@@ -11,13 +11,13 @@ import (
 type JsonDoc map[string]interface{}
 
 // This helper-structure holds data from more general repsonse of net/http library
-type Response struct {
+type httpResponse struct {
 	Code    int
 	Body    []byte
 	Cookies []*http.Cookie
 }
 
-func Do_GET(url string) (*Response, error) {
+func do_GET(url string) (*httpResponse, error) {
 	// TODO: add logrus to all fmt.Println...
 	fmt.Println("GET>", url)
 
@@ -47,22 +47,22 @@ func Do_GET(url string) (*Response, error) {
 
 	fmt.Println("response Body:", string(bytes))
 
-	return &Response{
+	return &httpResponse{
 		Code:    resp.StatusCode,
 		Body:    bytes,
 		Cookies: resp.Cookies(),
 	}, nil
 }
 
-func Do_POST(url string, data []byte) (*Response, error) {
+func do_POST(url string, data []byte) (*httpResponse, error) {
 	return sendJsonRequest("POST", url, data)
 }
 
-func Do_PUT(url string, data []byte) (*Response, error) {
+func do_PUT(url string, data []byte) (*httpResponse, error) {
 	return sendJsonRequest("PUT", url, data)
 }
 
-func sendJsonRequest(method string, url string, data []byte) (*Response, error) {
+func sendJsonRequest(method string, url string, data []byte) (*httpResponse, error) {
 	// TODO: add logrus to all fmt.Println...
 	fmt.Println(method+">", url)
 
@@ -94,7 +94,7 @@ func sendJsonRequest(method string, url string, data []byte) (*Response, error) 
 
 	fmt.Println("response Body:", string(bytes))
 
-	return &Response{
+	return &httpResponse{
 		Code:    resp.StatusCode,
 		Body:    bytes,
 		Cookies: resp.Cookies(),

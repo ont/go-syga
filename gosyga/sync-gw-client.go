@@ -12,7 +12,7 @@ type ClientApi struct {
 	url    string
 }
 
-type SessionPasswordRequest struct {
+type sessionPasswordRequest struct {
 	UserName     string `json:"name"`
 	UserPassword string `json:"password"`
 }
@@ -27,7 +27,7 @@ func NewClientApi(url string, bucket string) *ClientApi {
 func (c *ClientApi) CreateSession(username string, password string) (*SessionToken, error) {
 	url := c.url + "/" + url.QueryEscape(c.bucket) + "/_session"
 
-	sessReq := SessionPasswordRequest{
+	sessReq := sessionPasswordRequest{
 		UserName:     username,
 		UserPassword: password,
 	}
@@ -37,7 +37,7 @@ func (c *ClientApi) CreateSession(username string, password string) (*SessionTok
 		return nil, err
 	}
 
-	resp, err := Do_POST(url, data)
+	resp, err := do_POST(url, data)
 	if err != nil {
 		return nil, err
 	}

@@ -25,11 +25,6 @@ type User struct {
 	Disabled      bool     `json:"disabled"`
 }
 
-type SessionRequest struct {
-	UserName string `json:"name"`
-	TTL      int    `json:"ttl"`
-}
-
 type SessionToken struct {
 	CookieName string `json:"cookie_name"`
 	Expires    string `json:"expires"`
@@ -44,6 +39,11 @@ type SessionInfo struct {
 	} `json:"userCtx"`
 }
 
+type sessionRequest struct {
+	UserName string `json:"name"`
+	TTL      int    `json:"ttl"`
+}
+
 func NewAdminApi(url string, bucket string) *AdminApi {
 	return &AdminApi{
 		bucket: bucket,
@@ -54,7 +54,7 @@ func NewAdminApi(url string, bucket string) *AdminApi {
 func (a *AdminApi) GetUser(uuid string) (*User, error) {
 	url := a.url + "/" + url.QueryEscape(a.bucket) + "/_user/" + url.QueryEscape(uuid)
 
-	resp, err := Do_GET(url)
+	resp, err := do_GET(url)
 
 	if err != nil {
 		return nil, err
@@ -94,7 +94,7 @@ func (a *AdminApi) CreateUser(uuid string, password string) (*User, error) {
 		return nil, err
 	}
 
-	_, err = Do_POST(url, data)
+	_, err = do_POST(url, data)
 
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ func (a *AdminApi) CreateUser(uuid string, password string) (*User, error) {
 func (a *AdminApi) CreateSession(username string) (*SessionToken, error) {
 	url := a.url + "/" + url.QueryEscape(a.bucket) + "/_session"
 
-	sessReq := SessionRequest{
+	sessReq := sessionRequest{
 		UserName: username,
 		TTL:      24 * 3600, // 24 hours
 	}
@@ -116,7 +116,7 @@ func (a *AdminApi) CreateSession(username string) (*SessionToken, error) {
 		return nil, err
 	}
 
-	resp, err := Do_POST(url, data)
+	resp, err := do_POST(url, data)
 
 	if err != nil {
 		return nil, err
@@ -141,7 +141,7 @@ func (a *AdminApi) CreateSession(username string) (*SessionToken, error) {
 func (a *AdminApi) GetDoc(docId string, v interface{}) (found bool, err error) {
 	url := a.url + "/" + url.QueryEscape(a.bucket) + "/" + docId
 
-	resp, err := Do_GET(url)
+	resp, err := do_GET(url)
 	if err != nil {
 		return false, err
 	}
@@ -165,7 +165,7 @@ func (a *AdminApi) GetDoc(docId string, v interface{}) (found bool, err error) {
 func (a *AdminApi) GetSession(sessionId string) (*SessionInfo, error) {
 	url := a.url + "/" + url.QueryEscape(a.bucket) + "/_session/" + sessionId
 
-	resp, err := Do_GET(url)
+	resp, err := do_GET(url)
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +234,7 @@ func (a *AdminApi) UpdateDoc(docId string, fields func(bytes []byte) (JsonDoc, e
 
 func (a *AdminApi) GetRawDoc(docId string) ([]byte, error) {
 	url := a.url + "/" + url.QueryEscape(a.bucket) + "/" + docId
-	resp, err := Do_GET(url)
+	resp, err := do_GET(url)
 
 	if err != nil {
 		return nil, err
@@ -254,7 +254,7 @@ func (a *AdminApi) GetRawDoc(docId string) ([]byte, error) {
 func (a *AdminApi) UpdateRawDoc(docId string, bytes []byte) error {
 	url := a.url + "/" + url.QueryEscape(a.bucket) + "/" + docId
 
-	resp, err := Do_PUT(url, bytes)
+	resp, err := do_PUT(url, bytes)
 
 	if err != nil {
 		return err
