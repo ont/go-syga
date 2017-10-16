@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 // General json document with unknown fields
@@ -27,7 +28,9 @@ func do_GET(url string) (*httpResponse, error) {
 		return nil, err
 	}
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
 	resp, err := client.Do(req)
 
 	if err != nil {
@@ -74,7 +77,9 @@ func sendJsonRequest(method string, url string, data []byte) (*httpResponse, err
 
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
 	resp, err := client.Do(req)
 
 	if err != nil {
