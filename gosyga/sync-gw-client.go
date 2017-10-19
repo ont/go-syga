@@ -10,6 +10,8 @@ import (
 type ClientApi struct {
 	bucket string
 	url    string
+
+	apiWithLogger
 }
 
 type sessionPasswordRequest struct {

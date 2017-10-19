@@ -13,6 +13,8 @@ import (
 type AdminApi struct {
 	bucket string
 	url    string
+
+	apiWithLogger
 }
 
 type User struct {
