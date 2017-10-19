@@ -48,15 +48,16 @@ type sessionRequest struct {
 
 func NewAdminApi(url string, bucket string) *AdminApi {
 	return &AdminApi{
-		bucket: bucket,
-		url:    url,
+		bucket:        bucket,
+		url:           url,
+		apiWithLogger: newNullApiLogger(),
 	}
 }
 
 func (a *AdminApi) GetUser(uuid string) (*User, error) {
 	url := a.url + "/" + url.QueryEscape(a.bucket) + "/_user/" + url.QueryEscape(uuid)
 
-	resp, err := do_GET(url)
+	resp, err := a.doGET(url)
 
 	if err != nil {
 		return nil, err
@@ -96,7 +97,7 @@ func (a *AdminApi) CreateUser(uuid string, password string) (*User, error) {
 		return nil, err
 	}
 
-	_, err = do_POST(url, data)
+	_, err = a.doPOST(url, data)
 
 	if err != nil {
 		return nil, err
@@ -118,7 +119,7 @@ func (a *AdminApi) CreateSession(username string) (*SessionToken, error) {
 		return nil, err
 	}
 
-	resp, err := do_POST(url, data)
+	resp, err := a.doPOST(url, data)
 
 	if err != nil {
 		return nil, err
@@ -143,7 +144,7 @@ func (a *AdminApi) CreateSession(username string) (*SessionToken, error) {
 func (a *AdminApi) GetDoc(docId string, v interface{}) (found bool, err error) {
 	url := a.url + "/" + url.QueryEscape(a.bucket) + "/" + docId
 
-	resp, err := do_GET(url)
+	resp, err := a.doGET(url)
 	if err != nil {
 		return false, err
 	}
@@ -167,7 +168,7 @@ func (a *AdminApi) GetDoc(docId string, v interface{}) (found bool, err error) {
 func (a *AdminApi) GetSession(sessionId string) (*SessionInfo, error) {
 	url := a.url + "/" + url.QueryEscape(a.bucket) + "/_session/" + sessionId
 
-	resp, err := do_GET(url)
+	resp, err := a.doGET(url)
 	if err != nil {
 		return nil, err
 	}
@@ -236,7 +237,7 @@ func (a *AdminApi) UpdateDoc(docId string, fields func(bytes []byte) (JsonDoc, e
 
 func (a *AdminApi) GetRawDoc(docId string) ([]byte, error) {
 	url := a.url + "/" + url.QueryEscape(a.bucket) + "/" + docId
-	resp, err := do_GET(url)
+	resp, err := a.doGET(url)
 
 	if err != nil {
 		return nil, err
@@ -256,7 +257,7 @@ func (a *AdminApi) GetRawDoc(docId string) ([]byte, error) {
 func (a *AdminApi) UpdateRawDoc(docId string, bytes []byte) error {
 	url := a.url + "/" + url.QueryEscape(a.bucket) + "/" + docId
 
-	resp, err := do_PUT(url, bytes)
+	resp, err := a.doPUT(url, bytes)
 
 	if err != nil {
 		return err

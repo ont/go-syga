@@ -39,7 +39,7 @@ func (c *ClientApi) CreateSession(username string, password string) (*SessionTok
 		return nil, err
 	}
 
-	resp, err := do_POST(url, data)
+	resp, err := c.doPOST(url, data)
 	if err != nil {
 		return nil, err
 	}

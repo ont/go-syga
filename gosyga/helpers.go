@@ -2,7 +2,6 @@ package gosyga
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -18,56 +17,23 @@ type httpResponse struct {
 	Cookies []*http.Cookie
 }
 
-func do_GET(url string) (*httpResponse, error) {
-	// TODO: add logrus to all fmt.Println...
-	fmt.Println("GET>", url)
-
-	req, err := http.NewRequest("GET", url, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
-	resp, err := client.Do(req)
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-
-	fmt.Println("response Status:", resp.Status)
-	fmt.Println("response Headers:", resp.Header)
-
-	bytes, err := ioutil.ReadAll(resp.Body)
-
-	if err != nil {
-		return nil, err
-	}
-
-	fmt.Println("response Body:", string(bytes))
-
-	return &httpResponse{
-		Code:    resp.StatusCode,
-		Body:    bytes,
-		Cookies: resp.Cookies(),
-	}, nil
+/*
+ * Some http methods for general api-class with logging.
+ */
+func (a *apiWithLogger) doGET(url string) (*httpResponse, error) {
+	return a.sendJsonRequest("GET", url, nil)
 }
 
-func do_POST(url string, data []byte) (*httpResponse, error) {
-	return sendJsonRequest("POST", url, data)
+func (a *apiWithLogger) doPOST(url string, data []byte) (*httpResponse, error) {
+	return a.sendJsonRequest("POST", url, data)
 }
 
-func do_PUT(url string, data []byte) (*httpResponse, error) {
-	return sendJsonRequest("PUT", url, data)
+func (a *apiWithLogger) doPUT(url string, data []byte) (*httpResponse, error) {
+	return a.sendJsonRequest("PUT", url, data)
 }
 
-func sendJsonRequest(method string, url string, data []byte) (*httpResponse, error) {
-	// TODO: add logrus to all fmt.Println...
-	fmt.Println(method+">", url)
+func (a *apiWithLogger) sendJsonRequest(method string, url string, data []byte) (*httpResponse, error) {
+	a.log.Debugf("%s %s", method, url)
 
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
 
@@ -88,8 +54,8 @@ func sendJsonRequest(method string, url string, data []byte) (*httpResponse, err
 
 	defer resp.Body.Close()
 
-	fmt.Println("response Status:", resp.Status)
-	fmt.Println("response Headers:", resp.Header)
+	a.log.Debug("response Status: ", resp.Status)
+	a.log.Debug("response Headers: ", resp.Header)
 
 	bytes, err := ioutil.ReadAll(resp.Body)
 
@@ -97,7 +63,7 @@ func sendJsonRequest(method string, url string, data []byte) (*httpResponse, err
 		return nil, err
 	}
 
-	fmt.Println("response Body:", string(bytes))
+	a.log.Debug("response Body:", string(bytes))
 
 	return &httpResponse{
 		Code:    resp.StatusCode,
