@@ -21,8 +21,9 @@ type sessionPasswordRequest struct {
 
 func NewClientApi(url string, bucket string) *ClientApi {
 	return &ClientApi{
-		bucket: bucket,
-		url:    url,
+		bucket:        bucket,
+		url:           url,
+		apiWithLogger: newNullApiLogger(),
 	}
 }
 
