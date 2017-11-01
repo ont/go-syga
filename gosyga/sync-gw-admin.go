@@ -269,3 +269,29 @@ func (a *AdminApi) UpdateRawDoc(docId string, bytes []byte) error {
 
 	return nil
 }
+
+func (a *AdminApi) DeleteDoc(docId string) error {
+	url := a.url + "/" + url.QueryEscape(a.bucket) + "/" + docId
+
+	var doc struct {
+		Revision string `json:"_rev"`
+	}
+
+	found, err := a.GetDoc(docId, &doc)
+
+	if err != nil {
+		return err
+	}
+
+	if !found {
+		return fmt.Errorf("Can't find document with id %s in database", docId)
+	}
+
+	resp, err := a.doDELETE(url + "?rev=" + doc.Revision)
+
+	if resp.Code != 200 && resp.Code != 201 {
+		return fmt.Errorf("Error during deleting document %s: http response code not in (200, 201): %d", resp.Code)
+	}
+
+	return err
+}

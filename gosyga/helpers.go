@@ -32,16 +32,33 @@ func (a *apiWithLogger) doPUT(url string, data []byte) (*httpResponse, error) {
 	return a.sendJsonRequest("PUT", url, data)
 }
 
+func (a *apiWithLogger) doDELETE(url string) (*httpResponse, error) {
+	return a.sendRequest("DELETE", url, nil, false)
+}
+
 func (a *apiWithLogger) sendJsonRequest(method string, url string, data []byte) (*httpResponse, error) {
+	return a.sendRequest(method, url, data, true)
+}
+
+func (a *apiWithLogger) sendRequest(method string, url string, data []byte, isJson bool) (*httpResponse, error) {
 	a.log.Debugf("%s %s", method, url)
 
-	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
+	var req *http.Request
+	var err error
+
+	if data != nil {
+		req, err = http.NewRequest(method, url, bytes.NewBuffer(data))
+	} else {
+		req, err = http.NewRequest(method, url, nil)
+	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Set("Content-Type", "application/json")
+	if isJson {
+		req.Header.Set("Content-Type", "application/json")
+	}
 
 	client := &http.Client{
 		Timeout: 10 * time.Second,
