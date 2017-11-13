@@ -83,7 +83,6 @@ func (a *AdminApi) GetUser(uuid string) (*User, error) {
 
 func (a *AdminApi) CreateUser(uuid string, password string) (*User, error) {
 	url := a.url + "/" + url.QueryEscape(a.bucket) + "/_user/"
-	fmt.Println("CreateUser:>", url)
 
 	user := User{
 		Name:     uuid,
@@ -104,6 +103,22 @@ func (a *AdminApi) CreateUser(uuid string, password string) (*User, error) {
 	}
 
 	return a.GetUser(uuid)
+}
+
+func (a *AdminApi) UpdateUser(user *User) (*User, error) {
+	url := a.url + "/" + url.QueryEscape(a.bucket) + "/_user/" + url.QueryEscape(user.Name)
+
+	data, err := json.Marshal(user)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = a.doPUT(url, data)
+	if err != nil {
+		return nil, err
+	}
+
+	return a.GetUser(user.Name)
 }
 
 func (a *AdminApi) CreateSession(username string) (*SessionToken, error) {
