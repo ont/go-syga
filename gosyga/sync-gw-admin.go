@@ -209,6 +209,7 @@ func (a *AdminApi) UpdateDoc(docId string, fields func(bytes []byte) (JsonDoc, e
 	errs := make([]string, 0)
 
 	for try := 0; ; try++ {
+		// TODO: make number of retries configurable
 		if try > 5 {
 			return fmt.Errorf("Too many tries during document %s update: %#v", docId, errs)
 		}
