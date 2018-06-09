@@ -220,7 +220,7 @@ func (a *AdminApi) UpdateDoc(docId string, fields func(bytes []byte) (JsonDoc, e
 		}
 
 		if bytes == nil {
-			return fmt.Errorf("Document with id %s is not found")
+			return fmt.Errorf("Document with id %s is not found", docId)
 		}
 
 		fs, err := fields(bytes)
