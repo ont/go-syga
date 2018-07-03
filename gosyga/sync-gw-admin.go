@@ -121,12 +121,12 @@ func (a *AdminApi) UpdateUser(user *User) (*User, error) {
 	return a.GetUser(user.Name)
 }
 
-func (a *AdminApi) CreateSession(username string) (*SessionToken, error) {
+func (a *AdminApi) CreateSession(username string, ttl int) (*SessionToken, error) {
 	url := a.url + "/" + url.QueryEscape(a.bucket) + "/_session"
 
 	sessReq := sessionRequest{
 		UserName: username,
-		TTL:      24 * 3600, // 24 hours
+		TTL:      ttl,
 	}
 
 	data, err := json.Marshal(sessReq)
