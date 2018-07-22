@@ -280,7 +280,7 @@ func (a *AdminApi) UpdateRawDoc(docId string, bytes []byte) error {
 	}
 
 	if resp.Code != 200 && resp.Code != 201 {
-		return fmt.Errorf("Error during updating document %s: http response code not in (200, 201): %d", resp.Code)
+		return fmt.Errorf("Error during updating document: http response code not in (200, 201): %d", resp.Code)
 	}
 
 	return nil
