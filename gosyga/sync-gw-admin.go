@@ -2,6 +2,7 @@ package gosyga
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 )
@@ -45,6 +46,10 @@ type sessionRequest struct {
 	UserName string `json:"name"`
 	TTL      int    `json:"ttl"`
 }
+
+var (
+	ErrDocumentNotFound = errors.New("document not found")
+)
 
 func NewAdminApi(url string, bucket string) *AdminApi {
 	return &AdminApi{
@@ -220,7 +225,7 @@ func (a *AdminApi) UpdateDoc(docId string, fields func(bytes []byte) (JsonDoc, e
 		}
 
 		if bytes == nil {
-			return fmt.Errorf("Document with id %s is not found", docId)
+			return fmt.Errorf("error for '%s': %w", docId, ErrDocumentNotFound)
 		}
 
 		fs, err := fields(bytes)
