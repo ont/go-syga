@@ -1,19 +1,27 @@
 package gosyga
 
 import (
-	"github.com/sirupsen/logrus"
 	"io/ioutil"
+
+	"github.com/sirupsen/logrus"
 )
 
 type apiWithLogger struct {
+	// for sync gateway authorization
+	user     string
+	password string
+
 	log *logrus.Entry
 }
 
-func newNullApiLogger() apiWithLogger {
+func newNullApiLogger(user, password string) apiWithLogger {
 	logger := logrus.New()
 	logger.Out = ioutil.Discard
 
 	return apiWithLogger{
+		user:     user,
+		password: password,
+
 		log: logrus.NewEntry(logger),
 	}
 }

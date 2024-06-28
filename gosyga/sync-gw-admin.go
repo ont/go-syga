@@ -51,11 +51,12 @@ var (
 	ErrDocumentNotFound = errors.New("document not found")
 )
 
-func NewAdminApi(url string, bucket string) *AdminApi {
+func NewAdminApi(url string, bucket string, user, password string) *AdminApi {
 	return &AdminApi{
-		bucket:        bucket,
-		url:           url,
-		apiWithLogger: newNullApiLogger(),
+		bucket: bucket,
+		url:    url,
+
+		apiWithLogger: newNullApiLogger(user, password),
 	}
 }
 

@@ -56,6 +56,10 @@ func (a *apiWithLogger) sendRequest(method string, url string, data []byte, isJs
 		return nil, err
 	}
 
+	if a.user != "" && a.password != "" {
+		req.SetBasicAuth(a.user, a.password)
+	}
+
 	if isJson {
 		req.Header.Set("Content-Type", "application/json")
 	}

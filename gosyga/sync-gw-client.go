@@ -19,11 +19,11 @@ type sessionPasswordRequest struct {
 	UserPassword string `json:"password"`
 }
 
-func NewClientApi(url string, bucket string) *ClientApi {
+func NewClientApi(url string, bucket string, user, password string) *ClientApi {
 	return &ClientApi{
 		bucket:        bucket,
 		url:           url,
-		apiWithLogger: newNullApiLogger(),
+		apiWithLogger: newNullApiLogger(user, password),
 	}
 }
 
