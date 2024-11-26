@@ -48,7 +48,8 @@ type sessionRequest struct {
 }
 
 var (
-	ErrDocumentNotFound = errors.New("document not found")
+	ErrDocumentNotFound      = errors.New("document not found")
+	ErrDocumentAlreadyExists = errors.New("document already exists")
 )
 
 func NewAdminApi(url string, bucket string, user, password string) *AdminApi {
@@ -286,6 +287,9 @@ func (a *AdminApi) UpdateRawDoc(docId string, bytes []byte) error {
 	}
 
 	if resp.Code != 200 && resp.Code != 201 {
+		if resp.Code == 409 {
+			return fmt.Errorf("%w: %s", ErrDocumentAlreadyExists, docId)
+		}
 		return fmt.Errorf("Error during updating document: http response code not in (200, 201): %d", resp.Code)
 	}
 
